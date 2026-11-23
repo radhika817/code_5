@@ -1,0 +1,112 @@
+#include <stdio.h>
+#include <math.h>
+
+// Function to calculate number of parity bits needed
+int calculateParityBits(int m) {
+    int r = 0;
+    while (pow(2, r) < (m + r + 1)) {
+        r++;
+    }
+    return r;
+}
+
+// Function to insert data bits into positions, leaving parity positions empty
+void insertDataBits(int data[], int hamming[], int m, int r) {
+    int j = 0; // index for data[]
+    for (int i = 1; i <= m + r; i++) {
+        // If position is a power of 2, it's a parity bit slot -> skip for now
+        if ((i & (i - 1)) == 0) {
+            hamming[i] = -1; // placeholder for parity bit
+        } else {
+            hamming[i] = data[j++];
+        }
+    }
+}
+
+// Function to calculate parity bit values
+void calculateParity(int hamming[], int r, int total) {
+    for (int i = 0; i < r; i++) {
+        int parityPos = pow(2, i);
+        int count = 0;
+
+        for (int j = 1; j <= total; j++) {
+            if (j & parityPos) {           // positions covered by this parity bit
+                if (hamming[j] != -1)       // skip other unset parity bits
+                    count += hamming[j];
+            }
+        }
+        hamming[parityPos] = (count % 2 == 0) ? 0 : 1; // even parity
+    }
+}
+
+// Function to detect and correct a single-bit error
+int detectError(int hamming[], int r, int total) {
+    int errorPos = 0;
+
+    for (int i = 0; i < r; i++) {
+        int parityPos = pow(2, i);
+        int count = 0;
+
+        for (int j = 1; j <= total; j++) {
+            if (j & parityPos) {
+                count += hamming[j];
+            }
+        }
+        if (count % 2 != 0) {
+            errorPos += parityPos;   // accumulate binary position of error
+        }
+    }
+    return errorPos;
+}
+
+int main() {
+    int m, i;
+
+    printf("Enter number of data bits: ");
+    scanf("%d", &m);
+
+    int data[m];
+    printf("Enter data bits (0/1) one by one:\n");
+    for (i = 0; i < m; i++)
+        scanf("%d", &data[i]);
+
+    int r = calculateParityBits(m);
+    int total = m + r;
+
+    int hamming[total + 1]; // 1-indexed
+    insertDataBits(data, hamming, m, r);
+    calculateParity(hamming, r, total);
+
+    printf("\nGenerated Hamming Code: ");
+    for (i = 1; i <= total; i++)
+        printf("%d", hamming[i]);
+    printf("\n");
+
+    // Simulate error: let user flip a bit to test correction
+    int errPos;
+    printf("\nEnter position to introduce error (1 to %d), or 0 for no error: ", total);
+    scanf("%d", &errPos);
+    if (errPos >= 1 && errPos <= total) {
+        hamming[errPos] = hamming[errPos] ^ 1; // flip the bit
+        printf("Bit at position %d flipped. Transmitted (corrupted) code: ", errPos);
+        for (i = 1; i <= total; i++)
+            printf("%d", hamming[i]);
+        printf("\n");
+    }
+
+    // Detection and correction at receiver
+    int error = detectError(hamming, r, total);
+
+    if (error == 0) {
+        printf("\nNo error detected.\n");
+    } else {
+        printf("\nError detected at position: %d\n", error);
+        hamming[error] = hamming[error] ^ 1; // correct the bit
+        printf("Corrected Hamming Code: ");
+        for (i = 1; i <= total; i++)
+            printf("%d", hamming[i]);
+        printf("\n");
+    }
+
+    return 0;
+}

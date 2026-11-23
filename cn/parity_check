@@ -1,0 +1,72 @@
+#include <stdio.h>
+
+#define ROWS 4
+#define COLS 4
+
+int main() {
+    int data[ROWS + 1][COLS + 1] = {0};
+    int rx[ROWS + 1][COLS + 1] = {0};
+
+    // 1. Sender: Input 4x4 data matrix
+    printf("Enter 4x4 binary data bits (row by row):\n");
+    for (int r = 0; r < ROWS; r++) {
+        for (int c = 0; c < COLS; c++) {
+            scanf("%d", &data[r][c]);
+            data[r][COLS] ^= data[r][c]; // Calculate Row Parity XOR operation
+            data[ROWS][c] ^= data[r][c]; // Calculate Column Parity XOR operation
+        }
+        data[ROWS][COLS] ^= data[r][COLS]; // Corner Parity
+    }
+
+    // Display Transmitted Frame
+    printf("\n--- Transmitted Matrix (with Parity Row & Col) ---\n");
+    for (int r = 0; r <= ROWS; r++) {
+        for (int c = 0; c <= COLS; c++) {
+            printf("%d ", data[r][c]);
+        }
+        printf("\n");
+    }
+
+    // 2. Receiver: Input 5x5 received frame (simulate bit flip here)
+    printf("\nEnter 5x5 received matrix (separated by spaces):\n");
+    for (int r = 0; r <= ROWS; r++) {
+        for (int c = 0; c <= COLS; c++) {
+            scanf("%d", &rx[r][c]);
+        }
+    }
+
+    // 3. Check Row and Column Parities at Receiver
+    int err_row = -1, err_col = -1;
+
+    for (int r = 0; r <= ROWS; r++) {
+        int r_parity = 0;
+        for (int c = 0; c <= COLS; c++) r_parity ^= rx[r][c];
+        if (r_parity != 0) err_row = r; // Row parity mismatch found
+    }
+
+    for (int c = 0; c <= COLS; c++) {
+        int c_parity = 0;
+        for (int r = 0; r <= ROWS; r++) c_parity ^= rx[r][c];
+        if (c_parity != 0) err_col = c; // Col parity mismatch found
+    }
+
+    // 4. Detection and Correction
+    if (err_row == -1 && err_col == -1) {
+        printf("\nStatus: No error detected. Matrix is valid.\n");
+    } else if (err_row != -1 && err_col != -1) {
+        printf("\nStatus: Single-bit error detected at Row %d, Col %d!\n", err_row + 1, err_col + 1);
+        rx[err_row][err_col] ^= 1; // Flip the bit to correct it
+
+        printf("\n--- Corrected Matrix ---\n");
+        for (int r = 0; r <= ROWS; r++) {
+            for (int c = 0; c <= COLS; c++) {
+                printf("%d ", rx[r][c]);
+            }
+            printf("\n");
+        }
+    } else {
+        printf("\nStatus: Multiple errors detected (cannot correct).\n");
+    }
+
+    return 0;
+}

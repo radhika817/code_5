@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include <string.h>
+
+void xor_div(char *data, const char *gen)  //Modulo-2 Division
+ {
+    int glen = strlen(gen), dlen = strlen(data) - glen + 1;
+    for (int i = 0; i < dlen; i++) {
+        if (data[i] == '1') {
+            for (int j = 0; j < glen; j++)
+                data[i + j] = (data[i + j] == gen[j]) ? '0' : '1';
+        }
+    }
+}
+
+int main() {
+    char msg[64], gen[16], frame[128], rem[128];
+    printf("Enter data : "); scanf("%s", msg);
+    printf("Enter generator( Shared Key): "); scanf("%s", gen);
+
+    int mlen = strlen(msg), glen = strlen(gen);
+
+    // Append (glen - 1) zeros
+    strcpy(frame, msg);
+    for (int i = 0; i < glen - 1; i++) frame[mlen + i] = '0';
+    frame[mlen + glen - 1] = '\0';
+
+    // Compute remainder
+    strcpy(rem, frame);
+    xor_div(rem, gen);
+
+    // Replace trailing zeros with remainder
+    for (int i = 0; i < glen - 1; i++) frame[mlen + i] = rem[mlen + i];
+    printf("Transmitted frame: %s\n", frame);
+
+    // Verification at receiver
+    printf("Enter received frame: "); scanf("%s", rem);
+    xor_div(rem, gen);
+
+    int error = 0;
+    for (int i = strlen(rem) - (glen - 1); rem[i]; i++)
+        if (rem[i] == '1') error = 1;
+
+    printf(error ? "Status: Error detected!\n" : "Status: Frame is valid.\n");
+    return 0;
+}

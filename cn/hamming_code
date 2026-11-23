@@ -22,7 +22,7 @@ void insertDataBits(int data[], int hamming[], int m, int r) {
         }
     }
 }
-
+    
 // Function to calculate parity bit values
 void calculateParity(int hamming[], int r, int total) {
     for (int i = 0; i < r; i++) {

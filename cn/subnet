@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <stdint.h>
+
+void print_ip(uint32_t ip) {
+    printf("%u.%u.%u.%u", (ip >> 24) & 0xFF, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
+}
+
+int main(void) {
+    unsigned int a, b, c, d, base_cidr, num_subnets;
+    printf("Enter base network (e.g. 192.168.1.0/24) and number of subnets: ");
+    if (scanf("%u.%u.%u.%u/%u %u", &a, &b, &c, &d, &base_cidr, &num_subnets) != 6) return 1;
+
+    // Find required borrowed bits (2^bits >= num_subnets)
+    int borrow = 0;
+    while ((1U << borrow) < num_subnets) borrow++;
+
+    int new_cidr = base_cidr + borrow;
+    if (new_cidr > 30) {
+        printf("Too many subnets requested for this prefix (max /30).\n");
+        return 1;
+    }
+
+    uint32_t base_ip = (a << 24) | (b << 16) | (c << 8) | d;
+    uint32_t mask = (new_cidr == 32) ? ~0U : (~0U << (32 - new_cidr));
+    uint32_t block_size = 1U << (32 - new_cidr);
+
+    printf("\nNew Subnet Mask: ");
+    print_ip(mask);
+    printf(" (/%d)\n\n", new_cidr);
+
+    for (unsigned int i = 0; i < num_subnets; i++) {
+        uint32_t net = base_ip + (i * block_size);
+        uint32_t bcast = net + block_size - 1;
+
+        printf("--- Subnet %u ---\n", i + 1);
+        printf("Network ID:      "); print_ip(net); printf("\n");
+        printf("Host address ranges:    "); print_ip(net + 1); printf(" - "); print_ip(bcast - 1); printf("\n");
+        printf("Broadcast:       "); print_ip(bcast); printf("\n\n");
+    }
+
+    return 0;
+}

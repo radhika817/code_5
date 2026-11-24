@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define TOTAL_FRAMES 10
+
+int main() {
+    int frame = 0;
+    int seq_num = 0;
+    srand(time(NULL));
+
+    printf("--- Stop and Wait ARQ Simulation ---\n\n");
+
+    while (frame < TOTAL_FRAMES) {
+        printf("[Sender]   Sending Frame %d (Seq No: %d)\n", frame + 1, seq_num);
+
+        // Simulate network loss: 30% chance of frame/ACK loss
+        int network_event = rand() % 10;
+
+        if (network_event < 3) {
+            // Frame lost or ACK lost -> triggers timeout & retransmission
+            printf("[Network]  Packet lost / Timeout expired!\n");
+            printf("[Sender]   Retransmitting Frame %d...\n\n", frame + 1);
+        } else {
+            // Successful transmission and ACK received
+            printf("[Receiver] Frame %d received correctly. Sending ACK %d\n", frame + 1, 1 - seq_num);
+            printf("[Sender]   ACK %d received successfully.\n\n", 1 - seq_num);
+
+            seq_num = 1 - seq_num; // Alternate between 0 and 1
+            frame++;               // Slide window to next frame
+        }
+    }
+
+    printf("All %d frames sent and acknowledged successfully.\n", TOTAL_FRAMES);
+    return 0;
+}

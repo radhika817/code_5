@@ -1,6 +1,5 @@
 
-#include <iostream>
-using namespace std;
+#include <stdio.h>
 
 #define INF 999
 
@@ -9,19 +8,19 @@ int main() {
     int dist[10], visited[10];
     int src, min, u;
 
-    cout << "Enter number of routers: ";
-    cin >> r;
+    printf("Enter number of routers: ");
+    scanf("%d", &r);
 
-    cout << "Enter cost matrix:\n";
+    printf("Enter cost matrix:\n");
 
     for(int i = 0; i < r; i++) {
         for(int j = 0; j < r; j++) {
-            cin >> cost[i][j];
+            scanf("%d", &cost[i][j]);
         }
     }
 
-    cout << "Enter source router: ";
-    cin >> src;
+    printf("Enter source router: ");
+    scanf("%d", &src);
     src--;
 
     // Initialize distance and visited arrays
@@ -59,11 +58,11 @@ int main() {
     }
 
     // Print final routing table
-    cout << "\nFinal Routing Table\n";
+    printf("\nFinal Routing Table\n");
 
     for(int i = 0; i < r; i++) {
-        cout << "\nRouter " << src + 1 << " to Router "
-             << i + 1 << " = " << dist[i];
+        printf("Router %d to Router %d = %d\n",
+               src + 1, i + 1, dist[i]);
     }
 
     return 0;

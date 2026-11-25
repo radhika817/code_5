@@ -110,3 +110,50 @@ int main() {
 
     return 0;
 }
+
+
+
+#include <stdio.h>
+
+int main() {
+    int d[7], p1, p2, p4;
+    int s1, s2, s4, error;
+
+    printf("Enter 4 data bits: ");
+    scanf("%d %d %d %d", &d[2], &d[4], &d[5], &d[6]);
+
+    // Calculate parity bits
+    d[0] = d[2] ^ d[4] ^ d[6];
+    d[1] = d[2] ^ d[5] ^ d[6];
+    d[3] = d[4] ^ d[5] ^ d[6];
+
+    printf("Hamming Code: ");
+    for (int i = 0; i < 7; i++)
+        printf("%d", d[i]);
+
+    // Receive 7 bits
+    printf("\nEnter received 7 bits: ");
+    for (int i = 0; i < 7; i++)
+        scanf("%1d", &d[i]);
+
+    // Check parity
+    s1 = d[0] ^ d[2] ^ d[4] ^ d[6];
+    s2 = d[1] ^ d[2] ^ d[5] ^ d[6];
+    s4 = d[3] ^ d[4] ^ d[5] ^ d[6];
+
+    error = s1 + (s2 * 2) + (s4 * 4);
+
+    if (error == 0) {
+        printf("No error detected!");
+    } else {
+        printf("Error at position %d\n", error);
+
+        d[error - 1] = d[error - 1] ^ 1;
+
+        printf("Corrected code: ");
+        for (int i = 0; i < 7; i++)
+            printf("%d", d[i]);
+    }
+
+    return 0;
+}

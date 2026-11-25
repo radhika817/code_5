@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define TOTAL_FRAMES 10
+#define WINDOW_SIZE 4
+
+int main() {
+    int frame = 0;
+    int i;
+    srand(time(NULL));
+
+    printf("--- Go-Back-N ARQ Simulation ---\n\n");
+
+    while (frame < TOTAL_FRAMES) {
+
+        int end = frame + WINDOW_SIZE;
+        if (end > TOTAL_FRAMES)
+            end = TOTAL_FRAMES;
+
+        printf("[Sender] Sending frames from %d to %d\n",
+               frame + 1, end);
+
+        int lost = -1;
+
+        for (i = frame; i < end; i++) {
+            printf("[Sender] Sending Frame %d\n", i + 1);
+
+            if (rand() % 10 < 2) {
+                lost = i;
+                printf("[Network] Frame %d lost!\n", i + 1);
+                break;
+            }
+
+            printf("[Receiver] Frame %d received successfully.\n",
+                   i + 1);
+        }
+
+        if (lost != -1) {
+            printf("[Receiver] Sending ACK for Frame %d\n", lost);
+            printf("[Sender] Timeout! Going back to Frame %d\n",
+                   lost + 1);
+            printf("[Sender] Retransmitting remaining frames...\n\n");
+
+            frame = lost;
+        }
+        else {
+            printf("[Receiver] All frames acknowledged.\n");
+            frame = end;
+            printf("[Sender] Sliding window forward.\n\n");
+        }
+    }
+
+    printf("All %d frames transmitted successfully!\n",
+           TOTAL_FRAMES);
+
+    return 0;
+}

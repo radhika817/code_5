@@ -8,7 +8,7 @@ int main() {
     int frame = 0;
     int seq_num = 0;
     srand(time(NULL));
-    
+
 
     printf("--- Stop and Wait ARQ Simulation ---\n\n");
 
@@ -35,3 +35,5 @@ int main() {
     printf("All %d frames sent and acknowledged successfully.\n", TOTAL_FRAMES);
     return 0;
 }
+
+

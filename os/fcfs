@@ -1,0 +1,160 @@
+
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+struct Process {
+    int pid, at, bt, ct, tat, wt, rt;
+};
+
+// FCFS Scheduling
+void FCFS(Process p[], int n) {
+    sort(p, p + n, [](Process a, Process b) {
+        return a.at < b.at;
+    });
+
+    int time = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (time < p[i].at)
+            time = p[i].at;
+
+        time += p[i].bt;
+        p[i].ct = time;
+        p[i].tat = p[i].ct - p[i].at;
+        p[i].wt = p[i].tat - p[i].bt;
+    }
+}
+
+// SJF Non-preemptive Scheduling
+void SJF(Process p[], int n) {
+    bool done[20] = {false};
+    int time = 0, completed = 0;
+
+    while (completed < n) {
+        int idx = -1;
+
+        for (int i = 0; i < n; i++) {
+            if (!done[i] && p[i].at <= time) {
+                if (idx == -1 || p[i].bt < p[idx].bt)
+                    idx = i;
+            }
+        }
+
+        if (idx == -1) {
+            time++;
+            continue;
+        }
+
+        time += p[idx].bt;
+        p[idx].ct = time;
+        p[idx].tat = p[idx].ct - p[idx].at;
+        p[idx].wt = p[idx].tat - p[idx].bt;
+
+        done[idx] = true;
+        completed++;
+    }
+}
+
+// Round Robin Scheduling
+void RR(Process p[], int n, int quantum) {
+    int rem[20];
+
+    for (int i = 0; i < n; i++)
+        rem[i] = p[i].bt;
+
+    int time = 0, completed = 0;
+
+    while (completed < n) {
+        bool executed = false;
+
+        for (int i = 0; i < n; i++) {
+            if (rem[i] > 0 && p[i].at <= time) {
+                executed = true;
+
+                int run = min(quantum, rem[i]);
+                time += run;
+                rem[i] -= run;
+
+                if (rem[i] == 0) {
+                    p[i].ct = time;
+                    p[i].tat = p[i].ct - p[i].at;
+                    p[i].wt = p[i].tat - p[i].bt;
+                    completed++;
+                }
+            }
+        }
+
+        if (!executed)
+            time++;
+    }
+}
+
+// Display Results
+void display(Process p[], int n) {
+    float avgWT = 0, avgTAT = 0;
+
+    cout << "\nPID\tAT\tBT\tCT\tTAT\tWT\n";
+
+    for (int i = 0; i < n; i++) {
+        cout << p[i].pid << "\t"
+             << p[i].at << "\t"
+             << p[i].bt << "\t"
+             << p[i].ct << "\t"
+             << p[i].tat << "\t"
+             << p[i].wt << "\n";
+
+        avgWT += p[i].wt;
+        avgTAT += p[i].tat;
+    }
+
+    cout << "\nAverage Waiting Time: " << avgWT / n;
+    cout << "\nAverage Turnaround Time: " << avgTAT / n << endl;
+}
+
+int main() {
+    int n, choice, quantum;
+
+    cout << "Enter number of processes: ";
+    cin >> n;
+
+    Process p[20], temp[20];
+
+    for (int i = 0; i < n; i++) {
+        p[i].pid = i + 1;
+
+        cout << "Enter Arrival Time and Burst Time for P"
+             << i + 1 << ": ";
+        cin >> p[i].at >> p[i].bt;
+    }
+
+    cout << "\n1. FCFS\n2. SJF\n3. Round Robin\n";
+    cout << "Enter choice: ";
+    cin >> choice;
+
+    copy(p, p + n, temp);
+
+    switch (choice) {
+        case 1:
+            FCFS(temp, n);
+            break;
+
+        case 2:
+            SJF(temp, n);
+            break;
+
+        case 3:
+            cout << "Enter Time Quantum: ";
+            cin >> quantum;
+            RR(temp, n, quantum);
+            break;
+
+        default:
+            cout << "Invalid choice!";
+            return 0;
+    }
+
+    display(temp, n);
+
+    return 0;
+}

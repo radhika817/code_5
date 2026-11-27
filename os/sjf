@@ -1,0 +1,60 @@
+
+#include <iostream>
+using namespace std;
+
+int main() {
+    int at[3], bt[3], ct[3], tat[3], wt[3];
+    int p[3] = {1, 2, 3};
+    bool done[3] = {false};
+
+    cout << "Enter Arrival Time and Burst Time:\n";
+
+    for (int i = 0; i < 3; i++) {
+        cout << "P" << i + 1 << ": ";
+        cin >> at[i] >> bt[i];
+    }
+
+    int time = 0, completed = 0;
+
+    while (completed < 3) {
+        int idx = -1;
+
+        // Find process with shortest burst time
+        for (int i = 0; i < 3; i++) {
+            if (!done[i] && at[i] <= time) {
+                if (idx == -1 || bt[i] < bt[idx]) {
+                    idx = i;
+                }
+            }
+        }
+
+        // If no process has arrived
+        if (idx == -1) {
+            time++;
+            continue;
+        }
+
+        // Execute selected process
+        time += bt[idx];
+
+        ct[idx] = time;
+        tat[idx] = ct[idx] - at[idx];
+        wt[idx] = tat[idx] - bt[idx];
+
+        done[idx] = true;
+        completed++;
+    }
+
+    cout << "\nProcess\tAT\tBT\tCT\tTAT\tWT\n";
+
+    for (int i = 0; i < 3; i++) {
+        cout << "P" << p[i] << "\t"
+             << at[i] << "\t"
+             << bt[i] << "\t"
+             << ct[i] << "\t"
+             << tat[i] << "\t"
+             << wt[i] << endl;
+    }
+
+    return 0;
+}

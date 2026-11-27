@@ -1,0 +1,90 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    int n = 3, m = 2;
+
+    int allocation[3][2] = {
+        {1, 0},
+        {0, 1},
+        {1, 1}
+    };
+
+    int maxNeed[3][2] = {
+        {2, 1},
+        {1, 2},
+        {2, 2}
+    };
+
+    int available[2] = {1, 1};
+    int need[3][2];
+
+    // Step 1: Calculate Need = Max - Allocation
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            need[i][j] = maxNeed[i][j] - allocation[i][j];
+        }
+    }
+
+    // Step 2: Increase Available resources
+    int add[2];
+
+    cout << "Enter resources to add (A B): ";
+    cin >> add[0] >> add[1];
+
+    for (int j = 0; j < m; j++) {
+        available[j] += add[j];
+    }
+
+    cout << "\nUpdated Available: ";
+    for (int j = 0; j < m; j++) {
+        cout << available[j] << " ";
+    }
+
+    // Step 3: Apply Banker's Safety Algorithm
+    int work[2] = {available[0], available[1]};
+    int finish[3] = {0, 0, 0};
+    int count = 0;
+
+    int safeSequence[3];
+
+    while (count < n) {
+        bool found = false;
+
+        for (int i = 0; i < n; i++) {
+
+            if (finish[i] == 0 &&
+                need[i][0] <= work[0] &&
+                need[i][1] <= work[1]) {
+
+                work[0] += allocation[i][0];
+                work[1] += allocation[i][1];
+
+                finish[i] = 1;
+                safeSequence[count] = i;
+                count++;
+
+                found = true;
+            }
+        }
+
+        if (!found) {
+            break;
+        }
+    }
+
+    // Step 4: Display result
+    if (count == n) {
+        cout << "\n\nSystem is in SAFE state.";
+        cout << "\nSafe Sequence: ";
+
+        for (int i = 0; i < n; i++) {
+            cout << "P" << safeSequence[i] << " ";
+        }
+    }
+    else {
+        cout << "\n\nSystem is in UNSAFE state.";
+    }
+
+    return 0;
+}
